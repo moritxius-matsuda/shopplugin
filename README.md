@@ -19,7 +19,7 @@ A flexible shop system for Minecraft servers with advanced features like NBT sup
 
 ## Installation
 
-1. Download the `shopplugin-1.4.3.jar` file
+1. Download the `shopplugin-*.jar` file
 2. Place it in your `plugins/` folder
 3. Restart the server
 4. The plugin automatically creates the `plugins/ShopPlugin/shops/` folder
