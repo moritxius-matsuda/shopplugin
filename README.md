@@ -2,6 +2,10 @@
 
 A flexible shop system for Minecraft servers with advanced features like NBT support, potions, and automatic restock system.
 
+[![Available on Modrinth](https://raw.githubusercontent.com/vLuckyyy/badges/main/avaiable-on-modrinth.svg)](https://modrinth.com/plugin/shopplugin)
+
+[![Available on BStats](https://raw.githubusercontent.com/vLuckyyy/badges/main/available-on-bstats.svg)](https://bstats.org/plugin/bukkit/Shop%20Plugin/26220)
+
 ## Features
 
 - 🏪 **Flexible Shop Creation** - Create unlimited shops with individual names
