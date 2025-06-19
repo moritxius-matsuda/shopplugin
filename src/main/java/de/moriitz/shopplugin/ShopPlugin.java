@@ -18,6 +18,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.potion.PotionType;
 import org.bukkit.potion.PotionData;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +66,9 @@ public class ShopPlugin extends JavaPlugin {
         if (shops.isEmpty()) {
             initializeDefaultShops();
         }
+        
+        // Initialize bStats
+        initializeBStats();
     }
     
     @Override
@@ -548,6 +554,83 @@ public class ShopPlugin extends JavaPlugin {
         return shopRestockIntervals.getOrDefault(shopKey, 24);
     }
     
+    private void initializeBStats() {
+        // Plugin ID from bStats: 26220
+        Metrics metrics = new Metrics(this, 26220);
+        
+        // Add custom charts
+        
+        // Chart: Number of shops
+        metrics.addCustomChart(new SingleLineChart("shops_count", () -> shops.size()));
+        
+        // Chart: Total trades count
+        metrics.addCustomChart(new SingleLineChart("total_trades", () -> {
+            int totalTrades = 0;
+            for (MerchantRecipe[] shopTrades : shops.values()) {
+                totalTrades += shopTrades.length;
+            }
+            return totalTrades;
+        }));
+        
+        // Chart: Server type (based on server software)
+        metrics.addCustomChart(new SimplePie("server_type", () -> {
+            String serverVersion = Bukkit.getVersion().toLowerCase();
+            if (serverVersion.contains("paper")) {
+                return "Paper";
+            } else if (serverVersion.contains("spigot")) {
+                return "Spigot";
+            } else if (serverVersion.contains("bukkit")) {
+                return "Bukkit";
+            } else {
+                return "Other";
+            }
+        }));
+        
+        // Chart: Average restock time
+        metrics.addCustomChart(new SimplePie("average_restock_time", () -> {
+            if (shopRestockIntervals.isEmpty()) {
+                return "24 hours";
+            }
+            
+            double average = shopRestockIntervals.values().stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(24.0);
+                
+            if (average <= 6) {
+                return "≤6 hours";
+            } else if (average <= 12) {
+                return "6-12 hours";
+            } else if (average <= 24) {
+                return "12-24 hours";
+            } else {
+                return ">24 hours";
+            }
+        }));
+        
+        // Chart: Plugin usage intensity
+        metrics.addCustomChart(new SimplePie("usage_intensity", () -> {
+            int totalTrades = 0;
+            for (MerchantRecipe[] shopTrades : shops.values()) {
+                totalTrades += shopTrades.length;
+            }
+            
+            if (totalTrades == 0) {
+                return "No trades";
+            } else if (totalTrades <= 10) {
+                return "Light (1-10 trades)";
+            } else if (totalTrades <= 50) {
+                return "Medium (11-50 trades)";
+            } else if (totalTrades <= 100) {
+                return "Heavy (51-100 trades)";
+            } else {
+                return "Very Heavy (100+ trades)";
+            }
+        }));
+        
+        getLogger().info("bStats metrics initialized successfully!");
+    }
+    
     public boolean removeShop(String shopName) {
         String shopKey = shopName.toLowerCase();
         shopDisplayNames.remove(shopKey);
@@ -641,6 +724,8 @@ public class ShopPlugin extends JavaPlugin {
                     return handleRemoveTrade(sender, args);
                 case "potions":
                     return handleListPotions(sender);
+                case "restock":
+                    return handleRestock(sender, args);
                 case "rename":
                     return handleRenameShop(sender, args);
                 case "trades":
@@ -673,6 +758,7 @@ public class ShopPlugin extends JavaPlugin {
                 sender.sendMessage("§c/shop trades <shopname> §7- List trades");
                 sender.sendMessage("§c/shop remove <shopname> §7- Remove shop");
                 sender.sendMessage("§c/shop potions §7- List available potion types");
+                sender.sendMessage("§c/shop restock <shopname> [hours] §7- Set/view restock interval");
             }
             return true;
         }
@@ -862,6 +948,53 @@ public class ShopPlugin extends JavaPlugin {
             }
             
             return formatted.toString();
+        }
+        
+        private boolean handleRestock(CommandSender sender, String[] args) {
+            if (!canManageShops(sender)) {
+                sender.sendMessage("§cYou don't have permission to manage shops!");
+                return true;
+            }
+            
+            if (args.length < 2) {
+                sender.sendMessage("§cUsage: /shop restock <shopname> [hours]");
+                sender.sendMessage("§eExample: /shop restock general 12");
+                sender.sendMessage("§7Current intervals:");
+                for (String shopName : shops.keySet()) {
+                    int hours = getShopRestockInterval(shopName);
+                    sender.sendMessage("§f- " + shopName + ": §e" + hours + " hours");
+                }
+                return true;
+            }
+            
+            String shopName = args[1].toLowerCase();
+            if (!shops.containsKey(shopName)) {
+                sender.sendMessage("§cShop '" + shopName + "' not found!");
+                return true;
+            }
+            
+            if (args.length >= 3) {
+                try {
+                    int hours = Integer.parseInt(args[2]);
+                    if (hours < 1) {
+                        sender.sendMessage("§cRestock interval must be at least 1 hour!");
+                        return true;
+                    }
+                    
+                    setShopRestockInterval(shopName, hours);
+                    sender.sendMessage("§aRestock interval for shop '" + shopName + "' set to " + hours + " hours!");
+                    return true;
+                    
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("§cInvalid number! Please enter a valid hour amount.");
+                    return true;
+                }
+            } else {
+                // Show current interval
+                int hours = getShopRestockInterval(shopName);
+                sender.sendMessage("§eShop '" + shopName + "' restock interval: §f" + hours + " hours");
+                return true;
+            }
         }
         
         private boolean handleAddTradeAdvanced(CommandSender sender, String[] args) {
@@ -1078,7 +1211,7 @@ public class ShopPlugin extends JavaPlugin {
                 subCommands.addAll(Arrays.asList("info", "list"));
                 
                 if (canManageShops(sender)) {
-                    subCommands.addAll(Arrays.asList("create", "addtrade", "addpotion", "addtradeadvanced", "removetrade", "rename", "trades", "remove", "potions"));
+                    subCommands.addAll(Arrays.asList("create", "addtrade", "addpotion", "addtradeadvanced", "removetrade", "rename", "trades", "remove", "potions", "restock"));
                 }
                 
                 for (String subCommand : subCommands) {
@@ -1098,7 +1231,7 @@ public class ShopPlugin extends JavaPlugin {
                 String subCommand = args[0].toLowerCase();
                 if (subCommand.equals("addtrade") || subCommand.equals("addpotion") || subCommand.equals("addtradeadvanced") || subCommand.equals("remove") || 
                     subCommand.equals("removetrade") || subCommand.equals("rename") || 
-                    subCommand.equals("trades")) {
+                    subCommand.equals("trades") || subCommand.equals("restock")) {
                     // Shop-Namen für diese Befehle
                     for (String shopName : shops.keySet()) {
                         if (shopName.toLowerCase().startsWith(args[1].toLowerCase())) {
@@ -1211,6 +1344,17 @@ public class ShopPlugin extends JavaPlugin {
                     for (String maxUse : maxUses) {
                         if (maxUse.startsWith(args[6])) {
                             completions.add(maxUse);
+                        }
+                    }
+                }
+            } else if (args.length == 3) {
+                String subCommand = args[0].toLowerCase();
+                if (subCommand.equals("restock")) {
+                    // Stunden-Vorschläge für Restock
+                    List<String> hours = Arrays.asList("1", "6", "12", "24", "48", "72");
+                    for (String hour : hours) {
+                        if (hour.startsWith(args[2])) {
+                            completions.add(hour);
                         }
                     }
                 }
