@@ -1,0 +1,36 @@
+name: ShopPlugin
+version: 1.4.3
+main: de.moriitz.shopplugin.ShopPlugin
+api-version: 1.18
+author: Moritz Meier im Auftrag von Matsuda Béla
+description: A flexible shop system for Minecraft servers
+
+commands:
+  shop:
+    description: Opens a shop menu or manages shops
+    usage: /<command> [shopname|subcommand]
+    aliases: [sp]
+
+permissions:
+  shopplugin.*:
+    description: Gives access to all ShopPlugin features
+    children:
+      shopplugin.admin: true
+      shopplugin.shop.use: true
+    default: op
+  
+  shopplugin.admin:
+    description: Allows managing shops (create, edit, delete)
+    default: op
+  
+  shopplugin.shop.use:
+    description: Allows using all shops
+    default: false
+  
+  shopplugin.shop.general:
+    description: Allows using the general shop
+    default: false
+
+  shopplugin.shop.*:
+    description: Allows using the specified shop
+    default: false
