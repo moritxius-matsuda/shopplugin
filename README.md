@@ -182,10 +182,3 @@ For problems or questions:
 1. Check server logs for error messages
 2. Make sure all permissions are set correctly
 3. Use `/shop info` to get plugin information
-
-## Version
-
-**Current Version**: 1.4.3  
-**Author**: Moritz Meier on behalf of Matsuda Béla  
-**Minecraft Version**: 1.18.2  
-**API Version**: 1.18
