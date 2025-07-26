@@ -4,6 +4,8 @@ A flexible shop system for Minecraft servers with advanced features like NBT sup
 
 [![Available on Modrinth](https://raw.githubusercontent.com/vLuckyyy/badges/main/avaiable-on-modrinth.svg)](https://modrinth.com/plugin/shopplugin)
 
+[![Available on SpigotMC](https://raw.githubusercontent.com/vLuckyyy/badges/refs/heads/main/available-on-spigotmc.svg)](https://www.spigotmc.org/resources/shop-plugin.127331/) 
+
 [![Available on BStats](https://raw.githubusercontent.com/vLuckyyy/badges/main/available-on-bstats.svg)](https://bstats.org/plugin/bukkit/Shop%20Plugin/26220)
 
 ## Features
