@@ -7,6 +7,8 @@ A flexible shop system for Minecraft servers with advanced features like NBT sup
 [![Available on Hangar](https://raw.githubusercontent.com/vLuckyyy/badges/refs/heads/main/avaiable-on-hangar.svg)](https://hangar.papermc.io/moritxius-matsuda/ShopPlugin)
 [![Available on BStats](https://raw.githubusercontent.com/vLuckyyy/badges/main/available-on-bstats.svg)](https://bstats.org/plugin/bukkit/Shop%20Plugin/26220)
 
+![Modrinth Downloads](https://img.shields.io/modrinth/dt/shopplugin?logo=modrinth&logoColor=1bd96a&label=Downloads&color=1bd96a&link=https%3A%2F%2Fmodrinth.com%2Fplugin%2Fshopplugin)
+
 ## Features
 
 - 🏪 **Flexible Shop Creation** - Create unlimited shops with individual names
@@ -183,3 +185,4 @@ For problems or questions:
 1. Check server logs for error messages
 2. Make sure all permissions are set correctly
 3. Use `/shop info` to get plugin information
+
